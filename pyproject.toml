@@ -1,0 +1,22 @@
+[project]
+name = "aiprod"
+version = "0.1.0"
+description = "Bộ máy ráp nhiều AI làm một dự án: đơn vị, trạng thái, thẻ việc, hàng đợi bot, QA, ghép"
+requires-python = ">=3.11"
+dependencies = ["PyYAML>=6", "Pillow>=10"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.scripts]
+aiprod = "aiprod.cli:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["aiprod*"]
+
+[tool.setuptools.package-data]
+aiprod = ["templates/*"]

@@ -1,0 +1,3 @@
+# cấu hình ghép, pack đọc file này
+output: renders/rough.mp4
+order: units.csv     # theo cột order
