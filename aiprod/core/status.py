@@ -28,7 +28,8 @@ def status_table(p: Project) -> str:
             group = group or r["group"]
             cells.append(r["status"] + (f" (#{r['pick']})" if r["pick"] else ""))
             if r["note"]:
-                notes.append(f"{st}: {r['note']}")
+                n = r["note"] if len(r["note"]) <= 60 else r["note"][:57] + "…"
+                notes.append(f"{st}: {n}")
         rows.append(f"| {uid} | {_c(group)} | " + " | ".join(cells) + f" | {_c('; '.join(notes))} |")
     gates = ", ".join(f"{g}: {p.gates.get(g, {}).get('status', '—')}" for g in ("G1", "G3"))
     summary = ", ".join(f"{s} {counts[s]}" for s in states.STATES if counts[s])

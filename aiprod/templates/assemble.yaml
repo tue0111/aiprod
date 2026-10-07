@@ -1,3 +1,5 @@
-# cấu hình ghép, pack đọc file này
-output: renders/rough.mp4
-order: units.csv     # theo cột order
+# Cấu hình ghép. Đầu ra do pack quyết định:
+#   video  → renders/rough.mp4      (deliver → renders/rough_preview.mp4 < 30 MB)
+#   slides → renders/deck.html + deck.md   (deliver → deliver/<tên>.zip)
+#   images → renders/grid.jpg       (deliver → deliver/images.zip)
+# Thứ tự: cột order trong units.csv (video: first_frame trong specs/<id>.yaml).

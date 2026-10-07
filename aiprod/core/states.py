@@ -30,7 +30,7 @@ DONE = {"approved", "assembled"}
 
 # việc kế tiếp cho từng trạng thái (dùng cho `aiprod next`)
 NEXT_ACTION = {
-    "todo": "viết spec → aiprod task {id} {stage}",
+    "todo": "sinh thẻ việc (đọc spec + template) → aiprod task {id} {stage}",
     "spec_ready": "giao worker → aiprod submit {id} {stage}",
     "generating": "chờ / lấy kết quả → aiprod collect {id} {stage}",
     "candidates": "chọn ứng viên → aiprod approve {id} {stage} --pick n",

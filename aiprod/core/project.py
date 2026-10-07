@@ -52,7 +52,7 @@ class Project:
     # ---------- nạp / lưu ----------
     @classmethod
     def load(cls, root: str | Path) -> "Project":
-        root = Path(root)
+        root = Path(root).resolve()  # tuyệt đối: relative_to và log luôn đúng dù chạy với -C .
         pm = root / "PROJECT.md"
         if not pm.exists():
             raise ProjectError(f"{pm} không tồn tại — đây chưa phải dự án aiprod")
