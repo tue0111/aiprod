@@ -7,7 +7,7 @@ from pathlib import Path
 from ..packs import get_pack
 
 TEMPLATES = Path(__file__).resolve().parent.parent / "templates"
-DIRS = ["tasks", "tools", "qa", "assets", "queue/inbox", "queue/outbox", "renders"]
+DIRS = ["tasks", "tools", "qa", "specs", "templates", "assets", "queue/inbox", "queue/outbox", "renders"]
 
 
 def new_project(root: str | Path, pack: str, name: str | None = None) -> dict:
@@ -40,6 +40,8 @@ def new_project(root: str | Path, pack: str, name: str | None = None) -> dict:
         put(f, (TEMPLATES / f).read_text(encoding="utf-8"))
     for stage in p["stages"]:
         put(f"qa/{stage}.md", (TEMPLATES / "qa.md").read_text(encoding="utf-8"))
+    for stage, tpl in p.get("templates", {}).items():
+        put(f"templates/{stage}.txt", tpl + "\n")
     for tool in sorted(set(p["workers"].values())):
         put(f"tools/{tool}.md", (TEMPLATES / "tool.md").read_text(encoding="utf-8").replace("{tool}", tool))
     for d in DIRS:

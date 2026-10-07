@@ -76,6 +76,69 @@ class Project:
     def save_meta(self) -> None:
         (self.root / "PROJECT.md").write_text(join_frontmatter(self.meta, self.body), encoding="utf-8")
 
+    # ---------- ghi trạng thái ----------
+    def set_status(self, row: dict, new: str, force: bool = False) -> str:
+        """Đổi trạng thái theo state machine. force=True bỏ qua kiểm chuyển (vẫn kiểm tên)."""
+        old = row["status"]
+        if force:
+            states.check_state(new)
+        else:
+            states.transition(old, new)
+        row["status"] = new
+        return old
+
+    def worker_of(self, row: dict) -> str:
+        return row.get("worker") or (self.meta.get("workers") or {}).get(row["stage"], "")
+
+    def is_g2_stage(self, stage: str) -> bool:
+        return stage in (self.gates.get("G2", {}).get("stages") or [])
+
+    def g2_delegated(self) -> bool:
+        return bool(self.gates.get("G2", {}).get("delegated"))
+
+    def set_gate(self, gate: str, status: str, by: str, at: str) -> None:
+        g = self.meta.setdefault("gates", {}).setdefault(gate, {})
+        g.update(status=status, by=by, at=at)
+        self.save_meta()
+
+    # ---------- spec của đơn vị ----------
+    def spec_path(self, uid: str) -> Path:
+        return self.root / "specs" / f"{uid}.yaml"
+
+    def spec(self, uid: str) -> dict:
+        p = self.spec_path(uid)
+        if not p.exists():
+            return {}
+        return yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+
+    def save_spec(self, uid: str, data: dict) -> None:
+        p = self.spec_path(uid)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=1000), encoding="utf-8")
+
+    def body_section(self, title: str) -> str:
+        """Nội dung một mục `## <title>` trong phần thân PROJECT.md."""
+        out, on = [], False
+        for line in self.body.splitlines():
+            if line.startswith("## "):
+                on = line[3:].strip().lower() == title.lower()
+                continue
+            if on:
+                out.append(line)
+        return "\n".join(out).strip()
+
+    def rules(self) -> list[str]:
+        sec = self.body_section("Luật cứng")
+        rules = [l[2:].strip() for l in sec.splitlines() if l.startswith("- ") and l[2:].strip() not in ("", "…")]
+        return rules + [str(r) for r in (self.meta.get("rules") or [])]
+
+    def prev_output(self, row: dict) -> str:
+        """Đầu ra đã duyệt của tầng ngay trước (đầu vào cho tầng này)."""
+        rows = self.unit_rows(row["id"])
+        idx = self._stage_idx(row["stage"])
+        prev = [r for r in rows if self._stage_idx(r["stage"]) < idx]
+        return prev[-1]["output"] if prev and states.is_done(prev[-1]["status"]) else ""
+
     # ---------- truy vấn ----------
     @property
     def stages(self) -> list[str]:
