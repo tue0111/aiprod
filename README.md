@@ -29,7 +29,7 @@ todo → spec_ready → generating → candidates → picked → qa_pass → app
 Cần Python 3.11 trở lên. Pack `video` cần thêm [ffmpeg](https://ffmpeg.org/download.html) trên PATH.
 
 ```bash
-git clone https://github.com/<user>/aiprod.git
+git clone https://github.com/tue0111/aiprod.git
 cd aiprod
 pip install -e ".[test]"
 ```
