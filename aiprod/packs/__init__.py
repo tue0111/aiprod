@@ -21,7 +21,7 @@ PACKS: dict[str, dict] = {
         "ext": {"image": "png", "video": "mp4"},
         "templates": {
             "image": "{content}. {characters}. {style} {sref} {mj_suffix} --no {mj_no}",
-            "video": "{motion} Static locked-off camera, no zoom, no pan. {grok_suffix}",
+            "video": "{motion}. Static locked-off camera, no zoom, no pan. {grok_suffix}",
         },
         "done_when": {
             "image": "Đủ vật trong `objects` có sẵn trong ảnh; bố cục khớp hành động; đúng luật cứng; 16:9.",

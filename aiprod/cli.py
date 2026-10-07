@@ -225,6 +225,14 @@ def cmd_bot(a) -> int:
     return 0
 
 
+def cmd_sync(a) -> int:
+    from .adapters.bot_file import sync
+
+    lines = sync(_p(a))
+    print("\n".join(lines) if lines else "không có việc nào đang chờ bot")
+    return 0
+
+
 # ---------- pha 5 ----------
 def cmd_lessons(a) -> int:
     from .core.lessons import add_lesson, list_lessons
@@ -328,6 +336,8 @@ def build_parser() -> argparse.ArgumentParser:
     s = add("bot", cmd_bot, "bot giả lập: xử lý queue/inbox, trả queue/outbox (để thử giao thức)")
     s.add_argument("--worker")
     s.add_argument("--fail", help="các việc giả lập lỗi, vd H01:video")
+
+    add("sync", cmd_sync, "thu kết quả mọi việc đang generating của bot (adapter bot_file)")
 
     s = add("lessons", cmd_lessons, "bài học vào thẻ năng lực: lessons add <tool> \"<luật>\" | lessons list [tool]")
     s.add_argument("action", choices=["add", "list"])

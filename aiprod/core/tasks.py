@@ -73,6 +73,7 @@ def render_prompt(template: str, ctx: dict) -> tuple[str, list[str]]:
     text = PLACEHOLDER.sub(sub, template)
     text = re.sub(r"\s+([.,])", r"\1", re.sub(r"[ \t]{2,}", " ", text)).strip()
     text = re.sub(r"(^|\s)[.,](?=\s|$)", r"\1", text).strip()
+    text = re.sub(r"([.!?])\.+", r"\1", text)  # "câu.. " khi giá trị đã có dấu chấm
     return text, sorted(set(missing))
 
 

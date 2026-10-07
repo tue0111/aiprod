@@ -74,7 +74,8 @@ def collect(p: Project, uid: str, stage: str) -> dict:
     elif res.files and row["status"] in ("spec_ready", "generating"):
         p.set_status(row, "candidates")
     p.save_units()
-    log.write(p.root, uid, stage, p.worker_of(row), f"collect:{ad.name}", ";".join(map(str, res.files)),
+    rel = [str(f.relative_to(p.root)).replace("\\", "/") if f.is_relative_to(p.root) else str(f) for f in res.files]
+    log.write(p.root, uid, stage, p.worker_of(row), f"collect:{ad.name}", ";".join(rel),
               "lỗi" if res.failed else ("ok" if res.files else "chưa có"), res.message)
     return {"adapter": ad.name, "result": res, "status": row["status"]}
 
