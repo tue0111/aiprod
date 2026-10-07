@@ -21,4 +21,4 @@ build-backend = "setuptools.build_meta"
 include = ["aiprod*"]
 
 [tool.setuptools.package-data]
-aiprod = ["templates/*"]
+aiprod = ["templates/*", "templates/tools/*", "templates/qa/*"]

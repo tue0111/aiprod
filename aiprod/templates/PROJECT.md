@@ -6,6 +6,8 @@ stages: {stages}
 workers: {workers}
 groups: []
 format: "{format}"
+audience: ""
+tone: ""
 style: ""
 style_ref: ""
 gates:
