@@ -120,9 +120,13 @@ def cmd_qa(a) -> int:
         return 0
     from .core.qa import run_qa
 
-    r = run_qa(p, a.id, a.stage, apply=not a.dry_run)
-    print(r["report"])
-    return 0
+    ids = [u["id"] for u in p.units if u["stage"] == a.stage] if a.id == "all" else [a.id]
+    bad = 0
+    for uid in ids:
+        r = run_qa(p, uid, a.stage, apply=not a.dry_run)
+        print(r["report"] + "\n")
+        bad += not r["ok"]
+    return 1 if bad else 0
 
 
 def cmd_gate(a) -> int:

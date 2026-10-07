@@ -1,0 +1,45 @@
+# Bản chọn của rough_cut_v4 (E:\Film), chép từ build/build_rough_v4.py.
+# Đường dẫn tương đối so với <Film>/assets/.
+# - D08, D11: v4 dùng G-D08_web_take1 / G-D11_web_take1 (bản trên cloud). Trên đĩa không còn tên đó;
+#   so khung 780 và 890 của rough_cut_v4_preview với từng take → khớp take6_OK (sai khác TB < 1/255).
+# - Crop KHÔNG ghi ở đây: `aiprod qa` tự tính (cropdetect → cắt về 16:9, căn giữa), ra đúng
+#   H01/H02 1840:1036:40:26, H03 1876:1056:22:16, E01 1764:992:78:48, còn lại 1920:1080:0:4.
+# - Ảnh: lấy *_OK, nếu không có thì *_mjP7, nếu không có thì file duy nhất. D08/D11 có 3 ảnh _OK,
+#   chưa rõ ảnh nào sinh ra take6 → tạm lấy mj1 (không ảnh hưởng bản dựng vì shot dùng clip).
+
+video:
+  H01: grok/G-H1/G-H1_P7_t1.mp4
+  H02: grok/G-H1/G-H1_P7_t1.mp4      # H02 dùng chung clip H01, bắt đầu từ khung 90
+  H03: grok/G-H3/G-H3_P7_t1.mp4
+  H04: grok/G-H4/G-H4_P7_t1.mp4
+  C01: grok/G-C01/G-C01_take1_OK.mp4
+  C02: grok/G-C02/G-C02_take1_OK.mp4
+  C03: grok/G-C03/G-C03_take1_OK.mp4
+  C04: grok/G-C04/G-C04_take1_OK.mp4
+  D01: grok/G-D01/G-D01_take1_OK.mp4
+  D02: grok/G-D02/G-D02_take1_OK.mp4
+  D04: grok/G-D04/G-D04_take1_OK.mp4
+  D05: grok/G-D05/G-D05_take1_OK.mp4
+  D06: grok/G-D06/G-D06_take1_OK.mp4
+  D07: grok/G-D07/G-D07_take1_OK.mp4
+  D08: grok/G-D08/G-D08_take6_OK.mp4
+  D09: grok/G-D09/G-D09_take1_OK.mp4
+  D10: grok/G-D10/G-D10_take1_OK.mp4
+  D11: grok/G-D11/G-D11_take6_OK.mp4
+  D12: grok/G-D12/G-D12_take2_OK.mp4
+  E01: grok/G-E1/G-E1_P7_t1.mp4
+  E02: grok/G-E2/G-E2_P7_t1.mp4
+  E03: grok/G-E3/G-E3_P7_t1.mp4
+
+# Shot không có trong `video` dựng từ ảnh tĩnh + camera giả (B01–B12, D03, D13).
+# D13: timeline ghi GROK nhưng v4 dựng bằng ảnh tĩnh.
+
+start_frame:   # khung bắt đầu trong clip (theo fps dự án), tránh đoạn cuối hay lộ mặt
+  H02: 90
+  H03: 20
+  E01: 20
+  E03: 110
+
+transition_out:  # hiệu ứng cuối shot (v4 viết cứng trong script)
+  H04: "flash trắng 6f"
+  E03: "fade ra đen 12f"
