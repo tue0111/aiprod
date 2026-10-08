@@ -66,7 +66,7 @@ Chạy lệnh khi đứng trong thư mục dự án, hoặc thêm `-C <thư mụ
 5. Kiểm thẻ năng lực `tools/<worker>.md` (pack có sẵn mj, grok, gpt, claude). Thiếu thì viết theo mẫu.
 6. Kiểm QA checklist `qa/<stage>.md`.
 7. `aiprod plan` → sửa tới khi `Plan OK`.
-8. **G1**: đưa người xem brief + `aiprod status`, chờ đồng ý, rồi **người** chạy `aiprod gate G1` (hoặc bạn chạy khi người đã nói rõ "duyệt"/"ok", ghi `--by owner`). Đừng tự duyệt khi chưa được đồng ý.
+8. **G1**: đưa người xem brief + `aiprod status`, chờ đồng ý, rồi **người** chạy `aiprod gate G1 --quote "<câu của người>"` (hoặc bạn chạy khi người đã nói rõ "duyệt"/"ok", ghi `--by owner` và đúng câu của họ vào `--quote`). Đừng tự duyệt khi chưa được đồng ý.
 9. Produce: làm **một đơn vị mẫu** trước, duyệt, rồi nhân rộng (vòng bên dưới).
 10. `aiprod assemble` → **G3** (người xem bản ghép) → `aiprod gate G3` → `aiprod deliver`. Ghi bài học mới bằng `aiprod lessons add`.
 
@@ -83,7 +83,7 @@ aiprod sync                         # (bot) thu kết quả mọi việc đang g
 aiprod sheet <id> <stage>           # contact sheet ứng viên có đánh số
 aiprod approve <id> <stage> --pick 2    # chọn ứng viên → picked
 aiprod qa <id> <stage>              # QA máy (kỹ thuật) + contact sheet; lỗi kỹ thuật → qa_fail
-aiprod qa <id> <stage> --pass --note "..."   # sau khi bạn xem bằng mắt theo qa/<stage>.md (hoặc --fail)
+aiprod qa <id> <stage> --pass --note "..."   # sau khi bạn xem bằng mắt theo qa/<stage>.md (hoặc --fail). --by là người thì thêm --quote; worker của tầng đó không --pass được
 aiprod approve <id> <stage> [--by claude | --by owner --quote "<câu của người>"]    # → approved. Tầng G2: chỉ người, trừ khi gates.G2.delegated: true
 ```
 

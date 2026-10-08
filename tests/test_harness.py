@@ -221,3 +221,44 @@ def test_other_agent_can_qa_pass(proj):
     actions.pick(p, "S1", "outline", 1, "owner")
     actions.qa_verdict(reload(p), "S1", "outline", True, "", "gpt")
     assert reload(p).row("S1", "outline")["status"] == "qa_pass"
+
+
+# ---------------------------------------------------------------- --quote cho gate và qa
+
+def test_cli_gate_requires_quote_for_human(proj, capsys):
+    p = proj(CLAUDE_UNIT, pack="slides", g1=False)
+    assert run(p, "gate", "G1") == 2 and "--quote" in capsys.readouterr().err
+    assert not reload(p).gate_passed("G1")
+    assert run(p, "gate", "G1", "--by", "claude") == 2  # agent: vẫn bị chặn vì không phải người
+    assert "chỉ người" in capsys.readouterr().err
+    assert run(p, "gate", "G1", "--quote", "brief ok, duyệt G1") == 0
+    assert reload(p).gate_passed("G1")
+    gate_rows = [r for r in log.read(p.root) if r["action"] == "gate:G1"]
+    assert 'quote: "brief ok, duyệt G1"' in gate_rows[-1]["note"]
+    assert run(p, "gate", "G1", "--reopen") == 2  # reopen cũng cần quote
+    assert run(p, "gate", "G1", "--reopen", "--quote", "mở lại") == 0
+
+
+def test_cli_qa_verdict_requires_quote_for_human(proj, capsys):
+    p = collect_one(proj(CLAUDE_UNIT, pack="slides"), "S1", "outline")
+    actions.pick(p, "S1", "outline", 1, "owner")
+    assert run(p, "qa", "S1", "outline", "--pass") == 2 and "--quote" in capsys.readouterr().err
+    assert run(p, "qa", "S1", "outline", "--fail", "--note", "x") == 2
+    assert reload(p).row("S1", "outline")["status"] == "picked"
+    assert run(p, "qa", "S1", "outline", "--fail", "--note", "thiếu ý", "--quote", "outline này thiếu ý") == 0
+    assert run(p, "qa", "S1", "outline", "--pass", "--quote", "xem lại rồi, ok") == 0
+    row = [r for r in log.read(p.root) if r["action"] == "qa"][-1]
+    assert row["result"] == "qa_pass" and 'quote: "xem lại rồi, ok"' in row["note"]
+
+
+def test_cli_qa_agent_needs_no_quote_and_auto_qa_needs_none(proj):
+    p = proj("A1,g,1,,image,approved,mj,,1,x.png,\nA1,g,1,,video,todo,grok,,,,\n")
+    p = collect_one(p, "A1", "video", "mp4")
+    actions.pick(p, "A1", "video", 1, "claude")
+    assert run(p, "qa", "A1", "video", "--pass", "--by", "claude") == 0
+
+
+def test_auto_qa_needs_no_quote(proj):
+    p = collect_one(proj(CLAUDE_UNIT, pack="slides"), "S1", "outline")
+    actions.pick(p, "S1", "outline", 1, "owner")
+    assert run(p, "qa", "S1", "outline", "--dry-run") in (0, 1)  # QA máy không đòi --quote

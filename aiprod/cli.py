@@ -105,14 +105,21 @@ def cmd_collect(a) -> int:
     return 0
 
 
-def cmd_approve(a) -> int:
+def _need_quote(p: Project, a) -> None:
+    """--by là người thì phải kèm nguyên văn câu của người trong chat (HARNESS.md mục 4)."""
     from .core import actions
 
-    p = _p(a)
     if actions.is_human(p, a.by) and not (a.quote or "").strip():
         raise actions.ActionError(
             f"--by {a.by} là người duyệt: cần --quote \"<câu của người trong chat>\" "
             "(vd --quote \"ảnh #2 ok\"). Không có lời của người thì đừng chạy --by owner")
+
+
+def cmd_approve(a) -> int:
+    from .core import actions
+
+    p = _p(a)
+    _need_quote(p, a)
     if a.pick is not None:
         r = actions.pick(p, a.id, a.stage, a.pick, a.by, quote=a.quote or "")
         print(f"{a.id}:{a.stage} chọn #{a.pick}: {r['output']} → picked. Bước tiếp: aiprod qa {a.id} {a.stage}")
@@ -130,7 +137,8 @@ def cmd_qa(a) -> int:
 
     p = _p(a)
     if a.passed or a.failed:
-        r = actions.qa_verdict(p, a.id, a.stage, a.passed, a.note or "", a.by)
+        _need_quote(p, a)
+        r = actions.qa_verdict(p, a.id, a.stage, a.passed, a.note or "", a.by, quote=a.quote or "")
         print(f"{a.id}:{a.stage} → {r['status']}")
         return 0
     from .core.qa import run_qa
@@ -147,7 +155,9 @@ def cmd_qa(a) -> int:
 def cmd_gate(a) -> int:
     from .core import actions
 
-    r = actions.gate(_p(a), a.gate, not a.reopen, a.by)
+    p = _p(a)
+    _need_quote(p, a)
+    r = actions.gate(p, a.gate, not a.reopen, a.by, quote=a.quote or "")
     print(f"Cổng {r['gate']}: {r['status']}")
     return 0
 
@@ -318,12 +328,14 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--fail", dest="failed", action="store_true")
     s.add_argument("--note")
     s.add_argument("--by", default="owner")
+    s.add_argument("--quote", help="nguyên văn câu của người trong chat; bắt buộc khi --pass/--fail với --by là người")
     s.add_argument("--dry-run", action="store_true", help="chỉ báo cáo, không đổi trạng thái")
 
     s = add("gate", cmd_gate, "đặt cổng G1/G3 (người)")
     s.add_argument("gate", choices=["G1", "G3"])
     s.add_argument("--reopen", action="store_true", help="đưa cổng về pending")
     s.add_argument("--by", default="owner")
+    s.add_argument("--quote", help="nguyên văn câu của người trong chat; bắt buộc khi --by là người")
 
     s = add("set", cmd_set, "đổi trạng thái tay (sửa lỗi dữ liệu)")
     unit(s)

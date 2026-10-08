@@ -181,7 +181,7 @@ def pick(p: Project, uid: str, stage: str, n: int, by: str, quote: str = "") -> 
     return {"output": row["output"]}
 
 
-def qa_verdict(p: Project, uid: str, stage: str, passed: bool, note: str, by: str) -> dict:
+def qa_verdict(p: Project, uid: str, stage: str, passed: bool, note: str, by: str, quote: str = "") -> dict:
     row = p.row(uid, stage)
     if passed:  # qa --fail vẫn cho phép: worker tự báo lỗi của mình là tốt
         check_not_own_work(p, uid, stage, by, "chấm pass")
@@ -193,7 +193,7 @@ def qa_verdict(p: Project, uid: str, stage: str, passed: bool, note: str, by: st
     if note:
         row["note"] = note
     p.save_units()
-    log.write(p.root, uid, stage, p.worker_of(row), "qa", row["output"], new, f"{note} (by {by})".strip())
+    log.write(p.root, uid, stage, p.worker_of(row), "qa", row["output"], new, f"{note} (by {by}) {quote_note(quote)}".strip())
     return {"status": new}
 
 
@@ -222,7 +222,7 @@ def approve(p: Project, uid: str, stage: str, by: str, skip_qa: bool = False, no
     return {"status": "approved"}
 
 
-def gate(p: Project, name: str, passed: bool, by: str) -> dict:
+def gate(p: Project, name: str, passed: bool, by: str, quote: str = "") -> dict:
     if name not in ("G1", "G3"):
         raise ActionError("chỉ đặt G1 hoặc G3 bằng lệnh này; G2 duyệt theo từng đơn vị bằng aiprod approve")
     if not is_human(p, by):
@@ -231,7 +231,7 @@ def gate(p: Project, name: str, passed: bool, by: str) -> dict:
         raise ActionError("chưa thể qua G3: còn đơn vị chưa approved")
     status = "passed" if passed else "pending"
     p.set_gate(name, status, by, log.now())
-    log.write(p.root, action=f"gate:{name}", result=status, note=f"by {by}")
+    log.write(p.root, action=f"gate:{name}", result=status, note=f"by {by} {quote_note(quote)}".strip())
     return {"gate": name, "status": status}
 
 
