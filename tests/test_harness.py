@@ -80,3 +80,18 @@ def test_cli_agent_approve_needs_no_quote(proj):
     actions.pick(p, "A1", "video", 1, "claude")
     actions.qa_verdict(reload(p), "A1", "video", True, "", "claude")
     assert run(p, "approve", "A1", "video", "--by", "claude") == 0
+
+
+# ---------------------------------------------------------------- cổng 3
+
+def test_set_force_is_logged_and_shown_in_status(proj):
+    from aiprod.core.status import status_table
+    p = proj(CLAUDE_UNIT, pack="slides")
+    assert "set --force" not in status_table(p)
+    actions.set_state(p, "S1", "outline", "spec_ready", "owner", force=False)  # todo → spec_ready hợp lệ
+    assert "set --force" not in status_table(reload(p))
+    actions.set_state(reload(p), "S1", "outline", "approved", "owner", force=True)
+    row = [r for r in log.read(p.root) if r["action"] == "set:force"]
+    assert len(row) == 1 and row[0]["result"] == "spec_ready→approved" and "by owner force" in row[0]["note"]
+    out = status_table(reload(p))
+    assert "`set --force` đã dùng 1 lần" in out and "S1:outline spec_ready→approved" in out

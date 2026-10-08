@@ -191,7 +191,8 @@ def set_state(p: Project, uid: str, stage: str, new: str, by: str, force: bool) 
     row = p.row(uid, stage)
     old = p.set_status(row, new, force=force)
     p.save_units()
-    log.write(p.root, uid, stage, p.worker_of(row), "set", "", f"{old}→{new}", f"by {by}{' force' if force else ''}")
+    log.write(p.root, uid, stage, p.worker_of(row), "set:force" if force else "set", "", f"{old}→{new}",
+              f"by {by}{' force' if force else ''}")
     return {"old": old, "new": new}
 
 

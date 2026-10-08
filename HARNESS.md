@@ -43,7 +43,7 @@ Cổng: `aiprod plan` cảnh báo khi một tầng thiếu dữ liệu cho một
 |---|---|---|
 | Tầng sau chỉ bắt đầu khi tầng trước `approved` | `Project.blockers()` (phụ thuộc trong `units.csv`) | Có |
 | Không chạy bước đắt khi bước rẻ chưa duyệt | G1, G2, G3 | Có |
-| Không lách cổng bằng `set --force` | `set --force` ghi log (`action=set:force`) và `aiprod status` liệt kê | Chưa (hiện chỉ ghi `by X force` trong note, status không hiện) |
+| Không lách cổng bằng `set --force` | `set --force` ghi log (`action=set:force`) và `aiprod status` liệt kê | Có |
 | Chọn ứng viên trước, QA sau, duyệt sau cùng | Vòng đời trạng thái (`states.py`) | Có |
 | Agent không duyệt bài do chính nó làm | `approve` và `approve --pick` đọc `log.csv`; từ chối nếu `--by` trùng cột `worker` của các dòng `collect`/`ingest`/`pick` cùng (đơn vị, tầng). Giới hạn: `worker` là worker được gán cho tầng, không phải người chạy lệnh thật. Tầng gán `mj` mà `--by claude` duyệt thì không bị chặn (Claude không làm bài đó). Áp dụng cho cả `approve` và `approve --pick` | Có |
 | `--by owner` chỉ chạy khi Owner nói rõ trong chat | `aiprod approve` (CLI) bắt buộc `--quote "<câu của Owner>"` khi `--by` là người, ghi vào `note` trong `log.csv` dạng `quote: "..."`. API `actions` không đổi. Áp dụng cả `--pick`. Người duyệt tay cũng gõ `--quote`. `gate` và `qa --by owner` chưa đòi quote | Có |

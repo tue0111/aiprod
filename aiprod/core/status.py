@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections import Counter
 
-from . import states
+from . import log, states
 from .project import Project
 
 
@@ -33,7 +33,12 @@ def status_table(p: Project) -> str:
         rows.append(f"| {uid} | {_c(group)} | " + " | ".join(cells) + f" | {_c('; '.join(notes))} |")
     gates = ", ".join(f"{g}: {p.gates.get(g, {}).get('status', '—')}" for g in ("G1", "G3"))
     summary = ", ".join(f"{s} {counts[s]}" for s in states.STATES if counts[s])
-    return "\n".join(rows) + f"\n\nCổng — {gates}. Tầng: {summary or 'chưa có đơn vị'}."
+    out = "\n".join(rows) + f"\n\nCổng — {gates}. Tầng: {summary or 'chưa có đơn vị'}."
+    forced = [r for r in log.read(p.root) if r["action"] == "set:force"]
+    if forced:
+        out += f"\n\n⚠ `set --force` đã dùng {len(forced)} lần (bỏ qua state machine):"
+        out += "".join(f"\n- {r['time']} {r['unit']}:{r['stage']} {r['result']} ({r['note']})" for r in forced)
+    return out
 
 
 def next_table(p: Project, show_blocked: bool = False) -> str:
