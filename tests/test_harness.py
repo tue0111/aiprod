@@ -95,3 +95,71 @@ def test_set_force_is_logged_and_shown_in_status(proj):
     assert len(row) == 1 and row[0]["result"] == "spec_ready→approved" and "by owner force" in row[0]["note"]
     out = status_table(reload(p))
     assert "`set --force` đã dùng 1 lần" in out and "S1:outline spec_ready→approved" in out
+
+
+# ---------------------------------------------------------------- cổng 4
+
+def fail_once(p, uid="A1", stage="image"):
+    """Một vòng: có ứng viên, chọn, qa_fail, quay về spec_ready."""
+    p = collect_one(p, uid, stage, "png")
+    actions.pick(p, uid, stage, 1, "owner")
+    actions.qa_verdict(reload(p), uid, stage, False, "lỗi", "owner")
+    return reload(p)
+
+
+def test_third_qa_fail_locks_attempts_until_human_note(proj):
+    p = proj("A1,g,1,,image,todo,mj,,,,\n")
+    for _ in range(2):
+        p = fail_once(p)
+        assert actions.qa_fail_count(p, "A1", "image") in (1, 2) and not actions.lock_reason(p, "A1", "image")
+        p.root.joinpath("assets/A1/A1_image_x_t1.png").unlink()
+        # task quay về spec_ready, ứng viên cũ xoá để vòng sau nhận file mới
+    p = fail_once(p)
+    assert actions.qa_fail_count(p, "A1", "image") == 3
+    for fn in (lambda: actions.task(p, "A1", "image"), lambda: actions.task(p, "A1", "image", force=True),
+               lambda: actions.submit(p, "A1", "image"), lambda: actions.collect(p, "A1", "image")):
+        with pytest.raises(actions.ActionError, match="qa_fail 3 lần"):
+            fn()
+    actions.pick(p, "A1", "image", 1, "owner")  # approve --pick không bị khoá
+    with pytest.raises(actions.ActionError, match="chỉ người"):
+        actions.add_note(reload(p), "A1", "image", "đổi nguồn", "claude")
+    assert actions.lock_reason(reload(p), "A1", "image")
+    actions.add_note(reload(p), "A1", "image", "ảnh gốc sai bố cục, sửa nguồn", "owner")
+    assert not actions.lock_reason(reload(p), "A1", "image") and actions.qa_fail_count(reload(p), "A1", "image") == 0
+    actions.task(reload(p), "A1", "image")
+
+
+def test_lock_is_per_unit_stage(proj):
+    p = proj("A1,g,1,,image,todo,mj,,,,\nB2,g,2,,image,todo,mj,,,,\n")
+    for _ in range(3):
+        log.write(p.root, "A1", "image", "mj", "qa", "", "qa_fail")
+    assert actions.lock_reason(p, "A1", "image") and not actions.lock_reason(p, "B2", "image")
+    actions.task(p, "B2", "image")
+
+
+def test_ingest_skips_locked_unit_with_warning(proj, tmp_path):
+    from aiprod.core.ingest import ingest
+    p = proj("A1,g,1,,image,todo,mj,,,,\nB2,g,2,,image,todo,mj,,,,\n")
+    for _ in range(3):
+        log.write(p.root, "A1", "image", "mj", "qa:auto", "", "qa_fail")
+    src = tmp_path / "dl"
+    src.mkdir()
+    (src / "A1_image_a_t1.png").write_bytes(b"1")
+    (src / "B2_image_a_t1.png").write_bytes(b"1")
+    res = ingest(p, [src])
+    assert [m["id"] for m in res["moved"]] == ["B2"]
+    assert len(res["skipped"]) == 1 and "qa_fail 3 lần" in res["skipped"][0][1]
+    assert (src / "A1_image_a_t1.png").exists()
+
+
+def test_note_cli_and_approve_resets_count(proj, capsys):
+    p = proj("A1,g,1,,image,todo,mj,,,,\n")
+    for _ in range(3):
+        log.write(p.root, "A1", "image", "mj", "qa", "", "qa_fail")
+    assert run(p, "note", "A1", "image", "x", "--by", "claude") == 2
+    assert run(p, "note", "A1", "image", "đổi nguồn") == 0
+    assert not actions.lock_reason(p, "A1", "image")
+    for _ in range(3):
+        log.write(p.root, "A1", "image", "mj", "qa", "", "qa_fail")
+    log.write(p.root, "A1", "image", "mj", "approve", "", "approved")
+    assert actions.qa_fail_count(p, "A1", "image") == 0

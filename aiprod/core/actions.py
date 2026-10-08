@@ -41,8 +41,52 @@ def check_not_own_work(p: Project, uid: str, stage: str, by: str) -> None:
                           f"hoặc một agent khác duyệt.")
 
 
+MAX_QA_FAIL = 3
+QA_FAIL_ACTIONS = ("qa", "qa:auto")
+
+
+def qa_fail_count(p: Project, uid: str, stage: str) -> int:
+    """Số lần qa_fail của (đơn vị, tầng) từ log.csv, tính từ ghi chú của người hoặc lần duyệt gần nhất."""
+    n = 0
+    for r in log.read(p.root, uid):
+        if r["stage"] != stage:
+            continue
+        if r["action"] in ("note", "approve"):
+            n = 0
+        elif r["action"] in QA_FAIL_ACTIONS and r["result"] == "qa_fail":
+            n += 1
+    return n
+
+
+def lock_reason(p: Project, uid: str, stage: str) -> str:
+    """Rỗng nếu (đơn vị, tầng) được mở lần thử mới; ngược lại là lý do khoá."""
+    n = qa_fail_count(p, uid, stage)
+    if n < MAX_QA_FAIL:
+        return ""
+    return (f"{uid}:{stage} đã qa_fail {n} lần, dừng lại phân tích nguyên nhân (HARNESS.md mục 5). "
+            f"Người ghi chú để mở khoá: aiprod note {uid} {stage} \"<nguyên nhân/hướng sửa>\" --by owner")
+
+
+def check_unlocked(p: Project, uid: str, stage: str) -> None:
+    why = lock_reason(p, uid, stage)
+    if why:
+        raise ActionError(why)
+
+
+def add_note(p: Project, uid: str, stage: str, text: str, by: str) -> dict:
+    """Ghi chú của người; mở khoá (đơn vị, tầng) đang khoá vì qa_fail."""
+    row = p.row(uid, stage)
+    if not is_human(p, by):
+        raise ActionError("chỉ người (--by owner) ghi chú mở khoá được")
+    if not text.strip():
+        raise ActionError("ghi chú rỗng")
+    log.write(p.root, uid, stage, p.worker_of(row), "note", "", "ok", f"by {by}: {text.strip()}")
+    return {"unit": uid, "stage": stage}
+
+
 def task(p: Project, uid: str, stage: str, force: bool = False) -> dict:
     row = p.row(uid, stage)
+    check_unlocked(p, uid, stage)
     blockers = p.blockers(row)
     if blockers and not force:
         raise ActionError(f"{uid}:{stage} chưa viết thẻ được: " + "; ".join(blockers))
@@ -61,6 +105,7 @@ def submit(p: Project, uid: str, stage: str) -> dict:
     from ..adapters import adapter_for
 
     row = p.row(uid, stage)
+    check_unlocked(p, uid, stage)
     blockers = p.blockers(row)
     if blockers:
         raise ActionError(f"{uid}:{stage} chưa được làm: " + "; ".join(blockers))
@@ -86,6 +131,7 @@ def collect(p: Project, uid: str, stage: str) -> dict:
     from ..adapters import adapter_for
 
     row = p.row(uid, stage)
+    check_unlocked(p, uid, stage)
     ad = adapter_for(p, p.worker_of(row))
     res = ad.collect(row)
     row = p.row(uid, stage) if not res.files else _reload_row(p, uid, stage)
@@ -196,5 +242,5 @@ def set_state(p: Project, uid: str, stage: str, new: str, by: str, force: bool) 
     return {"old": old, "new": new}
 
 
-__all__ = ["ActionError", "task", "submit", "collect", "pick", "qa_verdict", "approve", "gate", "set_state",
+__all__ = ["ActionError", "add_note", "task", "submit", "collect", "pick", "qa_verdict", "approve", "gate", "set_state",
            "candidates", "states"]

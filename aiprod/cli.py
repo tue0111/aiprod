@@ -64,6 +64,10 @@ def cmd_task(a) -> int:
         if not explicit and not a.force and p.blockers(p.row(uid, stage)):
             print(f"{uid}:{stage} bỏ qua: " + "; ".join(p.blockers(p.row(uid, stage))))
             continue
+        why = actions.lock_reason(p, uid, stage)
+        if why and not explicit:
+            print(f"{uid}:{stage} bỏ qua: {why}")
+            continue
         r = actions.task(p, uid, stage, force=a.force)
         rel = r["path"].relative_to(p.root)
         print(f"{uid}:{stage} → {rel} ({'ghi mới' if r['written'] else 'giữ thẻ đã có, --force để sinh lại'}; "
@@ -147,6 +151,14 @@ def cmd_set(a) -> int:
 
     r = actions.set_state(_p(a), a.id, a.stage, a.status, a.by, a.force)
     print(f"{a.id}:{a.stage}: {r['old']} → {r['new']}")
+    return 0
+
+
+def cmd_note(a) -> int:
+    from .core import actions
+
+    actions.add_note(_p(a), a.id, a.stage, a.text, a.by)
+    print(f"{a.id}:{a.stage}: đã ghi ghi chú của người; qa_fail tính lại từ 0")
     return 0
 
 
@@ -311,6 +323,11 @@ def build_parser() -> argparse.ArgumentParser:
     unit(s)
     s.add_argument("status")
     s.add_argument("--force", action="store_true")
+    s.add_argument("--by", default="owner")
+
+    s = add("note", cmd_note, "ghi chú của người cho một (đơn vị, tầng); mở khoá khi đã qa_fail 3 lần")
+    unit(s)
+    s.add_argument("text")
     s.add_argument("--by", default="owner")
 
     s = add("log", cmd_log, "xem log.csv")

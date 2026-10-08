@@ -74,7 +74,8 @@ Mọi lệnh nhận `-C <thư mục dự án>` nếu không đứng trong thư m
 | `approve <id> <stage> [--pick n] [--by ai] [--quote "..."] [--skip-qa]` | Chọn ứng viên / duyệt; `--by owner` bắt buộc `--quote` |
 | `qa <id\|all> <stage> [--pass\|--fail --note]` | QA máy của pack / kết luận tay |
 | `gate G1\|G3 [--reopen]` | Cổng duyệt của người |
-| `set <id> <stage> <status> [--force]` | Sửa trạng thái tay |
+| `set <id> <stage> <status> [--force]` | Sửa trạng thái tay (`--force` được ghi log và hiện trong `status`) |
+| `note <id> <stage> "..." --by owner` | Ghi chú của người; mở khoá đơn vị đã `qa_fail` 3 lần (khoá `task`/`submit`/`collect`/`ingest`) |
 | `assemble [--draft] [--redo H01,E02]` / `deliver [--max-mb 30]` | Ghép / nén và giao |
 | `import <nguồn> <đích> --pack video [--picks file.yaml]` | Nhập dự án phim có sẵn (`docs/timeline.json` + `assets/`) |
 | `bot [--fail id:stage]` | Bot giả lập để thử giao thức hàng đợi |

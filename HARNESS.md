@@ -47,7 +47,7 @@ Cổng: `aiprod plan` cảnh báo khi một tầng thiếu dữ liệu cho một
 | Chọn ứng viên trước, QA sau, duyệt sau cùng | Vòng đời trạng thái (`states.py`) | Có |
 | Agent không duyệt bài do chính nó làm | `approve` và `approve --pick` đọc `log.csv`; từ chối nếu `--by` trùng cột `worker` của các dòng `collect`/`ingest`/`pick` cùng (đơn vị, tầng). Giới hạn: `worker` là worker được gán cho tầng, không phải người chạy lệnh thật. Tầng gán `mj` mà `--by claude` duyệt thì không bị chặn (Claude không làm bài đó). Áp dụng cho cả `approve` và `approve --pick` | Có |
 | `--by owner` chỉ chạy khi Owner nói rõ trong chat | `aiprod approve` (CLI) bắt buộc `--quote "<câu của Owner>"` khi `--by` là người, ghi vào `note` trong `log.csv` dạng `quote: "..."`. API `actions` không đổi. Áp dụng cả `--pick`. Người duyệt tay cũng gõ `--quote`. `gate` và `qa --by owner` chưa đòi quote | Có |
-| Hỏng 3 lần cùng đơn vị thì dừng | Đếm `qa_fail` theo (đơn vị, tầng) từ `log.csv`; lần thứ 3 khoá `task`, `submit`, `collect`; `ingest` bỏ qua đơn vị đang khoá và cảnh báo. Mở khoá bằng `aiprod note <id> <stage> "..." --by owner` (chỉ người). Không khoá `approve --pick` | Chưa |
+| Hỏng 3 lần cùng đơn vị thì dừng | Đếm `qa_fail` theo (đơn vị, tầng) từ `log.csv`; lần thứ 3 khoá `task`, `submit`, `collect`; `ingest` bỏ qua đơn vị đang khoá và cảnh báo. Mở khoá bằng `aiprod note <id> <stage> "..." --by owner` (chỉ người). Không khoá `approve --pick`. Bộ đếm về 0 khi có ghi chú của người hoặc khi duyệt `approved`. Giới hạn: mỗi dòng `qa`/`qa:auto` có `result=qa_fail` được tính một lần, kể cả chạy lại QA máy trên bài đã `qa_fail` | Có |
 | Ghi bài học sau mỗi lỗi mới | `aiprod lessons add` | Có |
 
 ## 5. Leo thang

@@ -113,7 +113,11 @@ def sync(p: Project) -> list[str]:
             continue
         if (p.meta.get("adapters") or {}).get(p.worker_of(row)) != "bot_file":
             continue
-        r = actions.collect(Project.load(p.root), row["id"], row["stage"])
+        try:
+            r = actions.collect(Project.load(p.root), row["id"], row["stage"])
+        except actions.ActionError as e:  # đơn vị bị khoá vì qa_fail
+            out.append(f"{row['id']}:{row['stage']}: bỏ qua, {e}")
+            continue
         out.append(f"{row['id']}:{row['stage']}: {r['result'].message} → {r['status']}")
     return out
 

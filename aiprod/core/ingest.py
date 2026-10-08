@@ -92,6 +92,8 @@ def dest_for(root: Path, info: dict) -> Path:
 
 def ingest(p: Project, sources: list[Path] | None = None, only: tuple[str, str] | None = None,
            dry_run: bool = False, copy: bool = False) -> dict:
+    from . import actions
+
     moved, skipped = [], []
     touched: set[tuple[str, str]] = set()
     for src in sources or default_sources(p):
@@ -112,6 +114,10 @@ def ingest(p: Project, sources: list[Path] | None = None, only: tuple[str, str] 
                 row = p.row(info["id"], info["stage"])
             except Exception:
                 skipped.append((f, f"không có dòng {info['id']}:{info['stage']} trong units.csv"))
+                continue
+            why = actions.lock_reason(p, row["id"], row["stage"])
+            if why:
+                skipped.append((f, "khoá: " + why))
                 continue
             dest = dest_for(p.root, info)
             rel = str(dest.relative_to(p.root)).replace("\\", "/")
