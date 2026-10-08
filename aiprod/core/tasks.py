@@ -58,6 +58,32 @@ def context(p: Project, row: dict) -> dict:
     return ctx
 
 
+def out_of_scope(p: Project, ctx: dict, stage: str) -> str:
+    """Việc worker không được đụng: `out_of_scope` trong spec, không có thì mặc định của pack."""
+    v = ctx.get("out_of_scope") or get_pack(p.meta.get("pack", "video")).get("out_of_scope", {}).get(stage, "")
+    return "; ".join(map(str, v)) if isinstance(v, list) else str(v or "")
+
+
+def contract_warnings(p: Project) -> list[str]:
+    """Tầng thiếu dữ liệu cho một trong bốn mục hợp đồng của thẻ việc (HARNESS.md mục 2)."""
+    pack = get_pack(p.meta.get("pack", "video"))
+    rules = p.rules()
+    out = []
+    for stage in p.stages:
+        miss = []
+        if stage_ext(p, stage) == "bin":
+            miss.append("sản phẩm giao (không biết đuôi file của tầng, khai `ext` trong PROJECT.md)")
+        if not rules:
+            miss.append("ràng buộc (PROJECT.md chưa có `## Luật cứng`)")
+        if not pack.get("out_of_scope", {}).get(stage):
+            miss.append("ngoài phạm vi (pack không có mặc định, mỗi spec cần `out_of_scope`)")
+        if not pack.get("done_when", {}).get(stage) and not _read(p.root / "qa" / f"{stage}.md"):
+            miss.append("tiêu chí nghiệm thu (không có `done_when` của pack lẫn `qa/<stage>.md`)")
+        if miss:
+            out.append(f"tầng {stage} thiếu dữ liệu cho thẻ việc: " + "; ".join(miss))
+    return out
+
+
 def render_prompt(template: str, ctx: dict) -> tuple[str, list[str]]:
     missing: list[str] = []
 
@@ -101,6 +127,7 @@ def build_task(p: Project, uid: str, stage: str) -> tuple[str, list[str]]:
         prompt,
         "```",
         "Ràng buộc: " + ("; ".join(rules) if rules else "(xem PROJECT.md)"),
+        f"Ngoài phạm vi: {out_of_scope(p, ctx, stage) or '(chưa khai; hỏi Orchestrator trước khi đổi thứ gì ngoài thẻ)'}",
         f"Đầu ra: assets/{uid}/{output_pattern(p, row)} | Ghi log: log.csv",
         f"Xong khi: {done_when}",
         "",

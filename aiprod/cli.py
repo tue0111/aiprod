@@ -30,7 +30,13 @@ def cmd_plan(a) -> int:
         print(f"Plan có {len(errs)} lỗi:")
         print("\n".join(f"- {e}" for e in errs))
         return 1
+    from .core.tasks import contract_warnings
+
     print(f"Plan OK: {len(p.unit_ids())} đơn vị, {len(p.units)} dòng (đơn vị × tầng).")
+    warns = contract_warnings(p)
+    if warns:
+        print(f"Cảnh báo ({len(warns)}), không chặn:")
+        print("\n".join(f"- {w}" for w in warns))
     return 0
 
 

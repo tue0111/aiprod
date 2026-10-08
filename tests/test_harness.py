@@ -163,3 +163,40 @@ def test_note_cli_and_approve_resets_count(proj, capsys):
         log.write(p.root, "A1", "image", "mj", "qa", "", "qa_fail")
     log.write(p.root, "A1", "image", "mj", "approve", "", "approved")
     assert actions.qa_fail_count(p, "A1", "image") == 0
+
+
+# ---------------------------------------------------------------- cổng 5
+
+def test_task_card_has_four_contract_sections(proj):
+    p = proj("A1,g,1,,image,todo,mj,,,,\n")
+    p.save_spec("A1", {"content": "Girl"})
+    text = actions.task(p, "A1", "image")["path"].read_text(encoding="utf-8")
+    for head in ("Đầu ra: assets/A1/A1_image_<tag>_t<n>.png", "Ràng buộc:", "Ngoài phạm vi: Không đổi bố cục", "Xong khi:"):
+        assert head in text
+
+
+def test_out_of_scope_from_spec_overrides_pack_default(proj):
+    p = proj("A1,g,1,,image,todo,mj,,,,\n")
+    p.save_spec("A1", {"content": "Girl", "out_of_scope": ["đổi màu tóc", "thêm chữ"]})
+    text = actions.task(p, "A1", "image")["path"].read_text(encoding="utf-8")
+    assert "Ngoài phạm vi: đổi màu tóc; thêm chữ" in text and "Không đổi bố cục" not in text
+
+
+def test_plan_warns_but_does_not_fail_when_contract_data_missing(proj, capsys):
+    p = proj("A1,g,1,,image,todo,mj,,,,\n")
+    assert not p.rules()  # dự án mới chưa có `## Luật cứng`
+    assert run(p, "plan") == 0
+    out = capsys.readouterr().out
+    assert "Plan OK" in out and "Cảnh báo (2), không chặn" in out and "ràng buộc" in out
+
+
+def test_contract_warnings_name_the_missing_item(proj):
+    from aiprod.core.tasks import contract_warnings
+    p = proj("A1,g,1,,image,todo,mj,,,,\n")
+    p.meta["stages"] = ["image", "custom"]
+    p.meta["workers"]["custom"] = "mj"
+    image, custom = [w for w in contract_warnings(p)]
+    assert image.startswith("tầng image") and "sản phẩm giao" not in image and "ngoài phạm vi" not in image
+    assert custom.startswith("tầng custom")
+    for item in ("sản phẩm giao", "ngoài phạm vi", "tiêu chí nghiệm thu"):
+        assert item in custom

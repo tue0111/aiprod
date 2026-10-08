@@ -27,6 +27,10 @@ PACKS: dict[str, dict] = {
             "image": "Đủ vật trong `objects` có sẵn trong ảnh; bố cục khớp hành động; đúng luật cứng; 16:9.",
             "video": "Một hành động nhỏ, camera đứng yên; không lỗi tay/chân/vật/phòng trôi/lộ mặt; crop hết viền đen.",
         },
+        "out_of_scope": {
+            "image": "Không đổi bố cục hay góc máy khác spec; không thêm vật ngoài `objects`; không thêm chữ/watermark; không đổi style.",
+            "video": "Không zoom/pan; không thêm vật hay nhân vật; không đổi cảnh so với ảnh gốc.",
+        },
     },
     "slides": {
         "unit": "slide",
@@ -45,6 +49,11 @@ PACKS: dict[str, dict] = {
             "content": "Tiêu đề ≤ 8 từ, thân ≤ 40 từ, không tràn khung, không lỗi chính tả.",
             "illustration": "16:9, không chữ trong ảnh, đúng style.",
         },
+        "out_of_scope": {
+            "outline": "Không viết nội dung chi tiết; không chọn hình; không thêm trang ngoài kế hoạch.",
+            "content": "Không đổi dàn ý đã duyệt; không thêm ý mới; không chọn hình.",
+            "illustration": "Không chữ trong ảnh; không đổi nội dung trang.",
+        },
     },
     "images": {
         "unit": "image",
@@ -60,6 +69,10 @@ PACKS: dict[str, dict] = {
         "done_when": {
             "image": "Đúng góc chụp trong spec, đúng kích thước, không chữ/watermark.",
             "edit": "Chỉ chỗ cần sửa thay đổi; phần còn lại giữ nguyên.",
+        },
+        "out_of_scope": {
+            "image": "Không thêm chữ/watermark; không đổi góc chụp trong spec.",
+            "edit": "Không đổi bố cục, màu, ánh sáng ngoài chỗ cần sửa.",
         },
     },
 }

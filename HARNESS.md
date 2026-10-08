@@ -28,7 +28,7 @@ Mỗi thẻ việc `tasks/<id>_<stage>.md` phải có đủ bốn mục. `aiprod
 
 Không có hợp đồng thì worker tự quyết khi nào xong. Có hợp đồng thì tiêu chí quyết định.
 
-Cổng: `aiprod plan` cảnh báo khi một tầng thiếu dữ liệu cho một trong bốn mục. (Chưa có.)
+Cổng: `aiprod plan` cảnh báo khi một tầng thiếu dữ liệu cho một trong bốn mục. (Có.) "Ngoài phạm vi" lấy từ `out_of_scope` trong spec của đơn vị, không có thì dùng mặc định của pack.
 
 ## 3. Thi hành: worker chỉ làm, báo, dừng
 
