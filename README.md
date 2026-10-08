@@ -63,7 +63,7 @@ Mọi lệnh nhận `-C <thư mục dự án>` nếu không đứng trong thư m
 | Lệnh | Việc |
 |---|---|
 | `new <dir> --pack video\|slides\|images` | Tạo dự án từ template (không ghi đè) |
-| `plan` | Kiểm `units.csv`: mã trùng, tầng/trạng thái lạ, phụ thuộc thiếu hoặc vòng, thiếu worker; cảnh báo (không lỗi) khi tầng thiếu dữ liệu cho bốn mục thẻ việc |
+| `plan` | Kiểm `units.csv`: mã trùng, tầng/trạng thái lạ, phụ thuộc thiếu hoặc vòng, thiếu worker; cảnh báo (không lỗi) khi tầng thiếu dữ liệu cho bốn mục thẻ việc (`aiprod new` đã có `## Luật cứng` mẫu để sửa) |
 | `next [--all]` | Việc làm được ngay; `--all` kèm lý do việc đang chờ |
 | `status` | Bảng trạng thái markdown |
 | `task <id\|all> [stage] [--print] [--force]` | Sinh thẻ việc `tasks/<id>_<stage>.md` |

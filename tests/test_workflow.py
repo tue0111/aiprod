@@ -109,7 +109,7 @@ def test_render_prompt_missing_and_punctuation():
 def test_task_card_contents(proj):
     p = proj(TWO, meta={"style": {"sentence": "Anime style.", "sref": {"g": "URL1"}, "mj_suffix": "--ar 16:9",
                                    "mj_no": "text"}, "characters": {"woman": "long loose hair"}})
-    p.body = p.body.replace("## Luật cứng\n\n- …", "## Luật cứng\n\n- Tóc nữ luôn xõa")
+    p.body = p.body.replace("## Luật cứng\n", "## Luật cứng\n\n- Tóc nữ luôn xõa\n", 1)
     p.save_meta()
     p.save_spec("A1", {"content": "Girl at window", "video": {"motion": "Hair sways"}})
     r = actions.task(reload(p), "A1", "image")

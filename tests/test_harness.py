@@ -184,7 +184,11 @@ def test_out_of_scope_from_spec_overrides_pack_default(proj):
 
 def test_plan_warns_but_does_not_fail_when_contract_data_missing(proj, capsys):
     p = proj("A1,g,1,,image,todo,mj,,,,\n")
-    assert not p.rules()  # dự án mới chưa có `## Luật cứng`
+    assert len(p.rules()) == 3  # scaffold có `## Luật cứng` mẫu
+    p.body = p.body.split("## Luật cứng")[0] + "## Style\n"  # dự án cũ không có mục này
+    p.save_meta()
+    p = reload(p)
+    assert not p.rules()
     assert run(p, "plan") == 0
     out = capsys.readouterr().out
     assert "Plan OK" in out and "Cảnh báo (2), không chặn" in out and "ràng buộc" in out
@@ -193,6 +197,7 @@ def test_plan_warns_but_does_not_fail_when_contract_data_missing(proj, capsys):
 def test_contract_warnings_name_the_missing_item(proj):
     from aiprod.core.tasks import contract_warnings
     p = proj("A1,g,1,,image,todo,mj,,,,\n")
+    p.body = p.body.split("## Luật cứng")[0]
     p.meta["stages"] = ["image", "custom"]
     p.meta["workers"]["custom"] = "mj"
     image, custom = [w for w in contract_warnings(p)]
@@ -262,3 +267,15 @@ def test_auto_qa_needs_no_quote(proj):
     p = collect_one(proj(CLAUDE_UNIT, pack="slides"), "S1", "outline")
     actions.pick(p, "S1", "outline", 1, "owner")
     assert run(p, "qa", "S1", "outline", "--dry-run") in (0, 1)  # QA máy không đòi --quote
+
+
+# ---------------------------------------------------------------- scaffold có Luật cứng mẫu
+
+@pytest.mark.parametrize("pack", ["video", "slides", "images"])
+def test_new_project_plan_has_no_contract_warning(tmp_path, capsys, pack):
+    from aiprod.cli import main
+    assert main(["new", str(tmp_path / "n"), "--pack", pack]) == 0
+    capsys.readouterr()
+    assert main(["-C", str(tmp_path / "n"), "plan"]) == 0
+    out = capsys.readouterr().out
+    assert "Plan OK" in out and "Cảnh báo" not in out

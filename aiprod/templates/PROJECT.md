@@ -29,7 +29,11 @@ Người xem: …
 
 ## Luật cứng
 
-- …
+Mỗi gạch đầu dòng là một ràng buộc vào mọi thẻ việc. Ví dụ, sửa theo dự án:
+
+- Chỉ dùng nội dung, nhân vật và thông tin có trong brief; không tự thêm.
+- Không chữ, logo hay watermark lạ trong sản phẩm, trừ khi spec yêu cầu.
+- Mọi đơn vị giữ cùng style ở mục Style bên dưới.
 
 ## Style
 
