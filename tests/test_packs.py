@@ -134,7 +134,9 @@ def test_slides_flow(proj):
             actions.collect(Project.load(p.root), u, st)
             actions.pick(Project.load(p.root), u, st, 1, "owner")
             assert run_qa(Project.load(p.root), u, st)["ok"]
-            actions.qa_verdict(Project.load(p.root), u, st, True, "", "claude")
+            with pytest.raises(actions.ActionError, match="tự chấm pass"):  # worker không chấm pass bài mình
+                actions.qa_verdict(Project.load(p.root), u, st, True, "", "claude")
+            actions.qa_verdict(Project.load(p.root), u, st, True, "", "owner")
             actions.approve(Project.load(p.root), u, st, "owner")
     p = Project.load(p.root)
     assert p.assemble_ready()

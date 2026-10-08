@@ -29,7 +29,7 @@ Bạn ra việc, không thi hành và không tự duyệt bài của mình:
 
 - Việc của bạn: chia đơn vị, viết spec, sinh thẻ việc, giao, nhận file, báo cáo.
 - Thẻ việc phải đủ bốn mục: sản phẩm giao, ràng buộc, ngoài phạm vi, tiêu chí nghiệm thu. Thiếu thì bổ sung trước khi `submit`.
-- Nếu bạn là worker của một (đơn vị, tầng) (ví dụ tầng outline của slide), bạn **không** chọn ứng viên, không chạy `qa --pass`, không `approve` cho chính (đơn vị, tầng) đó. Báo Owner làm, hoặc nhờ agent khác.
+- Nếu bạn là worker của một (đơn vị, tầng) (ví dụ tầng outline của slide), bạn **không** chọn ứng viên, không chạy `qa --pass` (aiprod chặn; `qa --fail` thì được), không `approve` cho chính (đơn vị, tầng) đó. Báo Owner làm, hoặc nhờ agent khác.
 - Báo cáo luôn có dòng "Chưa kiểm: ...".
 
 ## Pack có sẵn

@@ -33,12 +33,12 @@ def made_by(p: Project, uid: str, stage: str) -> set[str]:
             if r["stage"] == stage and r["worker"] and r["action"].split(":")[0] in MADE_ACTIONS}
 
 
-def check_not_own_work(p: Project, uid: str, stage: str, by: str) -> None:
+def check_not_own_work(p: Project, uid: str, stage: str, by: str, what: str = "chọn/duyệt") -> None:
     """Agent không chọn/duyệt bài do chính nó làm (HARNESS.md mục 4)."""
     if by.lower() in made_by(p, uid, stage):
         raise ActionError(f"{uid}:{stage}: '{by}' là worker đã làm ra bài ở (đơn vị, tầng) này "
-                          f"(theo log.csv), không được tự chọn/duyệt. Nhờ Owner (--by owner) "
-                          f"hoặc một agent khác duyệt.")
+                          f"(theo log.csv), không được tự {what}. Nhờ Owner (--by owner) "
+                          f"hoặc một agent khác.")
 
 
 MAX_QA_FAIL = 3
@@ -183,6 +183,8 @@ def pick(p: Project, uid: str, stage: str, n: int, by: str, quote: str = "") -> 
 
 def qa_verdict(p: Project, uid: str, stage: str, passed: bool, note: str, by: str) -> dict:
     row = p.row(uid, stage)
+    if passed:  # qa --fail vẫn cho phép: worker tự báo lỗi của mình là tốt
+        check_not_own_work(p, uid, stage, by, "chấm pass")
     if row["status"] not in ("picked", "qa_pass", "qa_fail"):
         raise ActionError(f"{uid}:{stage} đang {row['status']}; QA chạy sau khi đã chọn (picked)")
     new = "qa_pass" if passed else "qa_fail"

@@ -200,3 +200,24 @@ def test_contract_warnings_name_the_missing_item(proj):
     assert custom.startswith("tầng custom")
     for item in ("sản phẩm giao", "ngoài phạm vi", "tiêu chí nghiệm thu"):
         assert item in custom
+
+
+# ---------------------------------------------------------------- cổng Checker
+
+def test_worker_cannot_qa_pass_own_work_but_can_qa_fail(proj):
+    p = collect_one(proj(CLAUDE_UNIT, pack="slides"), "S1", "outline")
+    actions.pick(p, "S1", "outline", 1, "owner")
+    with pytest.raises(actions.ActionError, match="tự chấm pass"):
+        actions.qa_verdict(reload(p), "S1", "outline", True, "ok", "claude")
+    assert reload(p).row("S1", "outline")["status"] == "picked"
+    actions.qa_verdict(reload(p), "S1", "outline", False, "thiếu ý", "claude")  # tự báo lỗi: được
+    assert reload(p).row("S1", "outline")["status"] == "qa_fail"
+    actions.qa_verdict(reload(p), "S1", "outline", True, "đã đọc lại", "owner")
+    assert reload(p).row("S1", "outline")["status"] == "qa_pass"
+
+
+def test_other_agent_can_qa_pass(proj):
+    p = collect_one(proj(CLAUDE_UNIT, pack="slides"), "S1", "outline")
+    actions.pick(p, "S1", "outline", 1, "owner")
+    actions.qa_verdict(reload(p), "S1", "outline", True, "", "gpt")
+    assert reload(p).row("S1", "outline")["status"] == "qa_pass"
