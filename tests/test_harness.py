@@ -1,7 +1,7 @@
 """Cổng cơ học của HARNESS.md."""
 import pytest
 
-from aiprod.core import actions
+from aiprod.core import actions, log
 from aiprod.core.project import Project
 
 # tầng slide `outline` do claude làm, `illustration` do mj
@@ -51,3 +51,32 @@ def test_ingest_rows_count_as_making(proj):
     from aiprod.core import log
     log.write(p.root, "S1", "outline", "claude", "ingest", "assets/S1/x.md", "ok")
     assert actions.made_by(reload(p), "S1", "outline") == {"claude"}
+
+
+# ---------------------------------------------------------------- cổng 2
+
+def run(p, *args):
+    from aiprod.cli import main
+    return main(["-C", str(p.root), *args])
+
+
+def test_cli_owner_approve_requires_quote(proj, capsys):
+    p = collect_one(proj(CLAUDE_UNIT, pack="slides"), "S1", "outline")
+    assert run(p, "approve", "S1", "outline", "--pick", "1") == 2  # --by mặc định là owner
+    assert "--quote" in capsys.readouterr().err
+    assert run(p, "approve", "S1", "outline", "--pick", "1", "--by", "owner", "--quote", "  ") == 2
+    assert reload(p).row("S1", "outline")["status"] == "candidates"  # chưa đổi gì
+    assert run(p, "approve", "S1", "outline", "--pick", "1", "--quote", "ảnh #1 ok") == 0
+    actions.qa_verdict(reload(p), "S1", "outline", True, "", "owner")
+    assert run(p, "approve", "S1", "outline") == 2
+    assert run(p, "approve", "S1", "outline", "--quote", "outline ok thì duyệt") == 0
+    notes = [r["note"] for r in log.read(p.root) if r["action"] in ("pick", "approve")]
+    assert all('quote: "' in n for n in notes) and 'quote: "outline ok thì duyệt"' in notes[-1]
+
+
+def test_cli_agent_approve_needs_no_quote(proj):
+    p = proj("A1,g,1,,image,approved,mj,,1,x.png,\nA1,g,1,,video,todo,grok,,,,\n")
+    p = collect_one(p, "A1", "video", "mp4")
+    actions.pick(p, "A1", "video", 1, "claude")
+    actions.qa_verdict(reload(p), "A1", "video", True, "", "claude")
+    assert run(p, "approve", "A1", "video", "--by", "claude") == 0

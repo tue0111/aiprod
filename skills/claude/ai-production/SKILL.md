@@ -84,7 +84,7 @@ aiprod sheet <id> <stage>           # contact sheet ứng viên có đánh số
 aiprod approve <id> <stage> --pick 2    # chọn ứng viên → picked
 aiprod qa <id> <stage>              # QA máy (kỹ thuật) + contact sheet; lỗi kỹ thuật → qa_fail
 aiprod qa <id> <stage> --pass --note "..."   # sau khi bạn xem bằng mắt theo qa/<stage>.md (hoặc --fail)
-aiprod approve <id> <stage> [--by claude]    # → approved. Tầng G2: chỉ người, trừ khi gates.G2.delegated: true
+aiprod approve <id> <stage> [--by claude | --by owner --quote "<câu của người>"]    # → approved. Tầng G2: chỉ người, trừ khi gates.G2.delegated: true
 ```
 
 Ghi chú về vòng này:
@@ -102,7 +102,7 @@ Khi tự làm worker văn bản (vd tầng outline/content của slide, worker `
 ```
 
 Duyệt tầng G2:
-- Người duyệt **một quyết định cụ thể** trong chat ("ảnh #2 ok", "outline ok thì cứ duyệt") → `approve ... --by owner` chỉ chạy khi Owner nói rõ trong chat, và ghi nguyên câu của họ vào báo cáo (và `--quote` khi aiprod hỗ trợ), cho đúng các đơn vị đó.
+- Người duyệt **một quyết định cụ thể** trong chat ("ảnh #2 ok", "outline ok thì cứ duyệt") → `approve ... --by owner` chỉ chạy khi Owner nói rõ trong chat, và ghi nguyên câu của họ vào báo cáo (truyền đúng câu đó vào `--quote`, bắt buộc khi `--by` là người), cho đúng các đơn vị đó.
 - Người ủy quyền **lâu dài** ("từ giờ chọn giúp đi") → đặt `gates.G2.delegated: true` trong `PROJECT.md`, rồi bạn duyệt bằng `--by claude`.
 - Tầng không thuộc G2: bạn được duyệt (`--by claude`) sau khi QA pass. trừ khi chính bạn là worker của (đơn vị, tầng) đó.
 

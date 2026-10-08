@@ -99,13 +99,18 @@ def cmd_approve(a) -> int:
     from .core import actions
 
     p = _p(a)
+    if actions.is_human(p, a.by) and not (a.quote or "").strip():
+        raise actions.ActionError(
+            f"--by {a.by} là người duyệt: cần --quote \"<câu của người trong chat>\" "
+            "(vd --quote \"ảnh #2 ok\"). Không có lời của người thì đừng chạy --by owner")
     if a.pick is not None:
-        r = actions.pick(p, a.id, a.stage, a.pick, a.by)
+        r = actions.pick(p, a.id, a.stage, a.pick, a.by, quote=a.quote or "")
         print(f"{a.id}:{a.stage} chọn #{a.pick}: {r['output']} → picked. Bước tiếp: aiprod qa {a.id} {a.stage}")
         if not a.skip_qa:
             return 0
         p = _p(a)
-    actions.approve(p, a.id, a.stage, a.by, skip_qa=a.skip_qa, note=a.note or "")
+    actions.approve(p, a.id, a.stage, a.by, skip_qa=a.skip_qa, note=a.note or "",
+                    quote=a.quote or "")
     print(f"{a.id}:{a.stage} → approved (by {a.by})")
     return 0
 
@@ -286,6 +291,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--by", default="owner", help="ai duyệt: owner (người) hoặc tên agent")
     s.add_argument("--skip-qa", action="store_true", help="người duyệt thẳng, không qua QA")
     s.add_argument("--note")
+    s.add_argument("--quote", help="nguyên văn câu của người duyệt trong chat; bắt buộc khi --by là người")
 
     s = add("qa", cmd_qa, "QA tự động của pack, hoặc ghi kết luận tay (--pass/--fail)")
     unit(s)

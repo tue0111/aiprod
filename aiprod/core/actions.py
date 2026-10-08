@@ -113,7 +113,11 @@ def candidates(p: Project, uid: str, stage: str) -> list[str]:
     return candidate_files(p, p.row(uid, stage))
 
 
-def pick(p: Project, uid: str, stage: str, n: int, by: str) -> dict:
+def quote_note(quote: str) -> str:
+    return f'quote: "{quote.strip()}"' if quote and quote.strip() else ""
+
+
+def pick(p: Project, uid: str, stage: str, n: int, by: str, quote: str = "") -> dict:
     row = p.row(uid, stage)
     check_not_own_work(p, uid, stage, by)
     if row["status"] not in ("candidates", "qa_fail", "picked"):
@@ -126,7 +130,8 @@ def pick(p: Project, uid: str, stage: str, n: int, by: str) -> dict:
     if row["status"] != "picked":
         p.set_status(row, "picked")
     p.save_units()
-    log.write(p.root, uid, stage, p.worker_of(row), "pick", row["output"], f"#{n}", f"by {by}")
+    log.write(p.root, uid, stage, p.worker_of(row), "pick", row["output"], f"#{n}",
+              f"by {by} {quote_note(quote)}".strip())
     return {"output": row["output"]}
 
 
@@ -144,7 +149,8 @@ def qa_verdict(p: Project, uid: str, stage: str, passed: bool, note: str, by: st
     return {"status": new}
 
 
-def approve(p: Project, uid: str, stage: str, by: str, skip_qa: bool = False, note: str = "") -> dict:
+def approve(p: Project, uid: str, stage: str, by: str, skip_qa: bool = False, note: str = "",
+            quote: str = "") -> dict:
     row = p.row(uid, stage)
     check_not_own_work(p, uid, stage, by)
     if p.is_g2_stage(stage) and not is_human(p, by) and not p.g2_delegated():
@@ -164,7 +170,7 @@ def approve(p: Project, uid: str, stage: str, by: str, skip_qa: bool = False, no
         row["note"] = note
     p.save_units()
     log.write(p.root, uid, stage, p.worker_of(row), "approve", row["output"], "approved",
-              f"by {by}{' (G2)' if p.is_g2_stage(stage) else ''} {note}".strip())
+              f"by {by}{' (G2)' if p.is_g2_stage(stage) else ''} {note} {quote_note(quote)}".strip())
     return {"status": "approved"}
 
 

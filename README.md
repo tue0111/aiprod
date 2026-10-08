@@ -71,7 +71,7 @@ Mọi lệnh nhận `-C <thư mục dự án>` nếu không đứng trong thư m
 | `ingest [--from DIR] [--dry-run] [--copy]` | Nhận file mới, đặt tên `<id>_<stage>_<tag>_t<n>`, không ghi đè |
 | `sync` | Thu kết quả mọi việc của bot đang `generating` |
 | `sheet <id> <stage>` | Contact sheet ứng viên |
-| `approve <id> <stage> [--pick n] [--by ai] [--skip-qa]` | Chọn ứng viên / duyệt |
+| `approve <id> <stage> [--pick n] [--by ai] [--quote "..."] [--skip-qa]` | Chọn ứng viên / duyệt; `--by owner` bắt buộc `--quote` |
 | `qa <id\|all> <stage> [--pass\|--fail --note]` | QA máy của pack / kết luận tay |
 | `gate G1\|G3 [--reopen]` | Cổng duyệt của người |
 | `set <id> <stage> <status> [--force]` | Sửa trạng thái tay |
