@@ -21,6 +21,17 @@ BRIEF → PLAN → PRODUCE (mỗi đơn vị: spec → generate → QA → duy�
 - **Vòng đời**: `todo → spec_ready → generating → candidates → picked → qa_pass → approved → assembled`; `qa_fail → spec_ready`.
 - **Cổng**: G1 (người duyệt brief + plan), G2 (người duyệt tầng rẻ quyết định chất lượng, vd ảnh gốc), G3 (người duyệt bản ghép). **Không bao giờ chạy bước đắt khi bước rẻ phía trước chưa duyệt.** `aiprod` tự chặn; đừng tìm cách vượt (không dùng `set --force` để lách cổng).
 
+## Vai và ranh giới (đọc `HARNESS.md` ở gốc dự án trước khi làm)
+
+Bốn vai: **Owner** (người duyệt), **Orchestrator** (bạn), **Worker** (MJ, Grok, GPT, bot, hoặc Claude khi thẻ ghi worker `claude`), **Checker** (QA máy, rồi mắt người hoặc agent khác).
+
+Bạn ra việc, không thi hành và không tự duyệt bài của mình:
+
+- Việc của bạn: chia đơn vị, viết spec, sinh thẻ việc, giao, nhận file, báo cáo.
+- Thẻ việc phải đủ bốn mục: sản phẩm giao, ràng buộc, ngoài phạm vi, tiêu chí nghiệm thu. Thiếu thì bổ sung trước khi `submit`.
+- Nếu bạn là worker của một (đơn vị, tầng) (ví dụ tầng outline của slide), bạn **không** chọn ứng viên, không chạy `qa --pass`, không `approve` cho chính (đơn vị, tầng) đó. Báo Owner làm, hoặc nhờ agent khác.
+- Báo cáo luôn có dòng "Chưa kiểm: ...".
+
 ## Pack có sẵn
 
 | Pack | Đơn vị | Tầng | Tầng G2 (người duyệt) | `assemble` ra | `deliver` ra |
@@ -78,7 +89,7 @@ aiprod approve <id> <stage> [--by claude]    # → approved. Tầng G2: chỉ ng
 
 Ghi chú về vòng này:
 - "Chọn ứng viên" chính là `approve --pick n`; luôn chọn trước, QA sau.
-- Luôn `task` trước (để có thẻ việc và `spec_ready`). `submit` với worker `manual` chỉ in thẻ việc và đánh dấu `generating` — khi chính bạn là worker thì có thể bỏ qua `submit`, viết file rồi `collect`/`ingest` thẳng từ `spec_ready`.
+- Luôn `task` trước (để có thẻ việc và `spec_ready`). `submit` với worker `manual` chỉ in thẻ việc và đánh dấu `generating` — khi chính bạn là worker thì có thể bỏ qua `submit`, viết file rồi `collect`/`ingest` thẳng từ `spec_ready`. Khi đó bạn dừng sau `collect`/`ingest`, việc chọn và duyệt chuyển cho Owner hoặc agent khác.
 - `approve --skip-qa` chỉ dành cho người duyệt thẳng (`--by owner`); bạn không dùng.
 
 Khi tự làm worker văn bản (vd tầng outline/content của slide, worker `claude`): đọc thẻ việc, viết file vào `assets/<id>/<id>_<stage>_claude_t1.md` (hoặc Downloads rồi `aiprod ingest`), rồi `aiprod collect <id> <stage>` hoặc `aiprod ingest`.
@@ -91,9 +102,9 @@ Khi tự làm worker văn bản (vd tầng outline/content của slide, worker `
 ```
 
 Duyệt tầng G2:
-- Người duyệt **một quyết định cụ thể** trong chat ("ảnh #2 ok", "outline ok thì cứ duyệt") → bạn chạy `approve ... --by owner` cho đúng các đơn vị đó và ghi trong báo cáo "theo ủy quyền: <câu của người>".
+- Người duyệt **một quyết định cụ thể** trong chat ("ảnh #2 ok", "outline ok thì cứ duyệt") → `approve ... --by owner` chỉ chạy khi Owner nói rõ trong chat, và ghi nguyên câu của họ vào báo cáo (và `--quote` khi aiprod hỗ trợ), cho đúng các đơn vị đó.
 - Người ủy quyền **lâu dài** ("từ giờ chọn giúp đi") → đặt `gates.G2.delegated: true` trong `PROJECT.md`, rồi bạn duyệt bằng `--by claude`.
-- Tầng không thuộc G2: bạn được duyệt (`--by claude`) sau khi QA pass.
+- Tầng không thuộc G2: bạn được duyệt (`--by claude`) sau khi QA pass. trừ khi chính bạn là worker của (đơn vị, tầng) đó.
 
 ## Luật xử lý lỗi
 

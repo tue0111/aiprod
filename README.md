@@ -17,6 +17,7 @@ BRIEF ──► PLAN ──► PRODUCE (lặp theo từng đơn vị) ──► 
 - **Tầng (stage):** một đơn vị có thể qua nhiều tầng, ví dụ `image → video`. Tầng sau chỉ bắt đầu khi tầng trước đã `approved`.
 - **Cổng duyệt:** G1 sau brief và plan, G2 sau tầng rẻ quyết định chất lượng, G3 sau khi ghép. Luật: **không chạy bước đắt khi bước rẻ chưa duyệt.**
 - **Worker** (MJ, Grok, GPT, Claude, bot) nối qua **adapter**: `manual` (in thẻ việc cho người/agent làm theo runbook) hoặc `bot_file` (hàng đợi JSON cho bot).
+- **Vai và cổng cơ học:** ai ra việc, ai làm, ai kiểm, ai duyệt được tách vai trong [HARNESS.md](HARNESS.md).
 
 Vòng đời mỗi (đơn vị, tầng):
 
