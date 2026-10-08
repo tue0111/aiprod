@@ -45,7 +45,7 @@ Cổng: `aiprod plan` cảnh báo khi một tầng thiếu dữ liệu cho một
 | Không chạy bước đắt khi bước rẻ chưa duyệt | G1, G2, G3 | Có |
 | Không lách cổng bằng `set --force` | `set --force` ghi log (`action=set:force`) và `aiprod status` liệt kê | Chưa (hiện chỉ ghi `by X force` trong note, status không hiện) |
 | Chọn ứng viên trước, QA sau, duyệt sau cùng | Vòng đời trạng thái (`states.py`) | Có |
-| Agent không duyệt bài do chính nó làm | `approve` đọc `log.csv`; từ chối nếu `--by` trùng cột `worker` của các dòng `collect`/`ingest`/`pick` cùng (đơn vị, tầng). Giới hạn: `worker` là worker được gán cho tầng, không phải người chạy lệnh thật. Tầng gán `mj` mà `--by claude` duyệt thì không bị chặn (Claude không làm bài đó) | Chưa |
+| Agent không duyệt bài do chính nó làm | `approve` và `approve --pick` đọc `log.csv`; từ chối nếu `--by` trùng cột `worker` của các dòng `collect`/`ingest`/`pick` cùng (đơn vị, tầng). Giới hạn: `worker` là worker được gán cho tầng, không phải người chạy lệnh thật. Tầng gán `mj` mà `--by claude` duyệt thì không bị chặn (Claude không làm bài đó). Áp dụng cho cả `approve` và `approve --pick` | Có |
 | `--by owner` chỉ chạy khi Owner nói rõ trong chat | `aiprod approve` (CLI) bắt buộc `--quote "<câu của Owner>"` khi `--by` là người, ghi vào `note` trong `log.csv` dạng `quote: "..."`. API `actions` không đổi | Chưa |
 | Hỏng 3 lần cùng đơn vị thì dừng | Đếm `qa_fail` theo (đơn vị, tầng) từ `log.csv`; lần thứ 3 khoá `task`, `submit`, `collect`; `ingest` bỏ qua đơn vị đang khoá và cảnh báo. Mở khoá bằng `aiprod note <id> <stage> "..." --by owner` (chỉ người). Không khoá `approve --pick` | Chưa |
 | Ghi bài học sau mỗi lỗi mới | `aiprod lessons add` | Có |

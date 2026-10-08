@@ -21,6 +21,26 @@ def is_human(p: Project, by: str) -> bool:
     return by.lower() in HUMAN or by == str(p.meta.get("owner", "")) and by != ""
 
 
+MADE_ACTIONS = ("collect", "ingest")
+
+
+def made_by(p: Project, uid: str, stage: str) -> set[str]:
+    """Worker đã làm ra bài ở (đơn vị, tầng), đọc từ log.csv (cột worker của dòng collect/ingest).
+
+    Đây là worker được gán cho tầng, không phải người chạy lệnh thật (log không có cột actor).
+    """
+    return {r["worker"].lower() for r in log.read(p.root, uid)
+            if r["stage"] == stage and r["worker"] and r["action"].split(":")[0] in MADE_ACTIONS}
+
+
+def check_not_own_work(p: Project, uid: str, stage: str, by: str) -> None:
+    """Agent không chọn/duyệt bài do chính nó làm (HARNESS.md mục 4)."""
+    if by.lower() in made_by(p, uid, stage):
+        raise ActionError(f"{uid}:{stage}: '{by}' là worker đã làm ra bài ở (đơn vị, tầng) này "
+                          f"(theo log.csv), không được tự chọn/duyệt. Nhờ Owner (--by owner) "
+                          f"hoặc một agent khác duyệt.")
+
+
 def task(p: Project, uid: str, stage: str, force: bool = False) -> dict:
     row = p.row(uid, stage)
     blockers = p.blockers(row)
@@ -95,6 +115,7 @@ def candidates(p: Project, uid: str, stage: str) -> list[str]:
 
 def pick(p: Project, uid: str, stage: str, n: int, by: str) -> dict:
     row = p.row(uid, stage)
+    check_not_own_work(p, uid, stage, by)
     if row["status"] not in ("candidates", "qa_fail", "picked"):
         raise ActionError(f"{uid}:{stage} đang {row['status']}, chưa có ứng viên để chọn")
     files = candidates(p, uid, stage)
@@ -125,6 +146,7 @@ def qa_verdict(p: Project, uid: str, stage: str, passed: bool, note: str, by: st
 
 def approve(p: Project, uid: str, stage: str, by: str, skip_qa: bool = False, note: str = "") -> dict:
     row = p.row(uid, stage)
+    check_not_own_work(p, uid, stage, by)
     if p.is_g2_stage(stage) and not is_human(p, by) and not p.g2_delegated():
         raise ActionError(f"{uid}:{stage} thuộc cổng G2: người phải duyệt (hoặc đặt gates.G2.delegated: true "
                           "khi người ủy quyền \"chọn giúp đi\")")
